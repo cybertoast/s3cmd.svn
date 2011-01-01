@@ -26,6 +26,7 @@ from Exceptions import *
 from ACL import ACL, GranteeLogDelivery
 from AccessLog import AccessLog
 from S3Uri import S3Uri
+from Versioning import Versioning
 
 __all__ = []
 class S3Request(object):
@@ -379,6 +380,18 @@ class S3(object):
 			else:
 				raise
 		return accesslog, response
+
+	# Implement versioning support - get and set
+	def get_versioning(self, uri):
+		request = self.create_request("BUCKET_LIST", bucket = uri.bucket(), extra = "?versioning")
+		response = self.send_request(request)
+		print "Response: %s" % response
+		versioning = Versioning(response['data'])
+		return versioning
+
+	def set_versioning(self, uri):
+		pass
+
 
 	## Low level methods
 	def urlencode_string(self, string, urlencoding_mode = None):

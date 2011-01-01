@@ -22,6 +22,7 @@ import codecs
 import locale
 import subprocess
 import htmlentitydefs
+import pprint
 
 from copy import copy
 from optparse import OptionParser, Option, OptionValueError, IndentedHelpFormatter
@@ -648,7 +649,10 @@ def cmd_info(args):
 			for grant in acl_grant_list:
 				output(u"   ACL:       %s: %s" % (grant['grantee'], grant['permission']))
 			if acl.isAnonRead():
-				output(u"   URL:       %s" % uri.public_url())
+				output(u"   URL:       %s" % uri.public_url()) 
+			ver = s3.get_versioning(uri) 
+			print "Versioning info:"
+			pprint.pprint(ver)
 		except S3Error, e:
 			if S3.codes.has_key(e.info["Code"]):
 				error(S3.codes[e.info["Code"]] % uri.bucket())
@@ -897,11 +901,13 @@ def cmd_sync_remote2remote(args):
 		item = src_list[file]
 		uri = S3Uri(item['object_uri_str'])
 		dst_file = item['target_uri']
+		dst_path = '/'.join((dst_file.split('/'))[:-1])
 		seq_label = "[%d of %d]" % (seq, src_count)
 		extra_headers = copy(cfg.extra_headers)
 		try:
 			# Copy source to destination
-			cmd_cp([u"%s"%uri, u"%s"%dst_file])
+			# cmd_cp([u"%s"%uri, u"%s"%dst_file])
+			cmd_cp([u"%s"%uri, u"%s"%dst_path])
 		except Exception, e:
 			error(u"Something went wrong: %s" % e)
 			continue
